@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Designing a recipe-development platform for food scientists — Yiyu Wang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300..700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=block" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #faf9f5;
+    --surface:   #ffffff;
+    --ink:       #1a1a1a;
+    --ink-2:     #4a4a45;
+    --ink-3:     #8a8a82;
+    --rule:      #e5e2da;
+    --rule-2:    #cfccc1;
+    --accent:    #2a4a3e;
+    --accent-bg: #ecefe9;
+    --warn:      #a85b1f;
+    --display:   "Source Serif 4", "Iowan Old Style", Georgia, serif;
+    --body:      "IBM Plex Sans", -apple-system, system-ui, sans-serif;
+    --mono:      "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 400;
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .page { max-width: 1180px; margin: 0 auto; padding: 72px 56px 96px; }
+  @media (max-width: 800px) { .page { padding: 48px 24px 72px; } }
+
+  /* ────────── header ────────── */
+  .topline {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 12px;
+    margin-bottom: 56px;
+  }
+  .topline .right { color: var(--accent); }
+
+  h1.title {
+    font-family: var(--display);
+    font-weight: 400;
+    font-variation-settings: "opsz" 60;
+    font-size: clamp(36px, 5.8vw, 64px);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    margin: 0 0 24px;
+    max-width: 18ch;
+  }
+  h1.title em {
+    font-style: italic;
+    font-variation-settings: "opsz" 60;
+    color: var(--accent);
+  }
+  .lede {
+    font-family: var(--display);
+    font-weight: 400;
+    font-variation-settings: "opsz" 32;
+    font-size: clamp(18px, 1.9vw, 22px);
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0 0 56px;
+  }
+
+  /* ────────── two-column intro ────────── */
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 64px;
+    margin-bottom: 80px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 800px) {
+    .intro-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+  .intro-grid p { margin: 0 0 18px; max-width: 62ch; }
+
+  /* fact card */
+  .fact-card {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 28px 24px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .fact-card dt {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 10.5px;
+    margin-top: 14px;
+  }
+  .fact-card dt:first-child { margin-top: 0; }
+  .fact-card dd {
+    margin: 2px 0 0;
+    color: var(--ink);
+  }
+  .fact-card .status {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-2);
+  }
+
+  /* ────────── sections ────────── */
+  section { margin: 0 0 80px; scroll-margin-top: 40px; }
+  section:last-child { margin-bottom: 0; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .section-label .num {
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-variation-settings: "opsz" 48;
+    font-size: clamp(28px, 3.6vw, 42px);
+    line-height: 1.12;
+    letter-spacing: -0.012em;
+    margin: 0 0 32px;
+    max-width: 22ch;
+  }
+  h2 em {
+    font-style: italic;
+    font-variation-settings: "opsz" 48;
+  }
+  h3 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.3;
+    margin: 36px 0 12px;
+    letter-spacing: -0.005em;
+  }
+  p { max-width: 68ch; margin: 0 0 18px; }
+  p + p { margin-top: 0; }
+
+  /* pullquote-style callout */
+  .callout {
+    font-family: var(--display);
+    font-weight: 400;
+    font-variation-settings: "opsz" 32;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.4;
+    color: var(--accent);
+    border-left: 2px solid var(--accent);
+    padding-left: 24px;
+    margin: 28px 0 28px;
+    max-width: 56ch;
+  }
+
+  /* the decisions list */
+  .decision {
+    border-top: 1px solid var(--rule);
+    padding: 28px 0 8px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+  }
+  .decision:last-child { border-bottom: 1px solid var(--rule); padding-bottom: 28px; }
+  .decision .idx {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    padding-top: 6px;
+  }
+  .decision h3 { margin: 0 0 8px; font-size: 21px; }
+  .decision .tradeoff {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 14px 0 4px;
+  }
+  .decision .tradeoff-body {
+    font-size: 15px;
+    color: var(--ink-2);
+    margin-bottom: 0;
+  }
+
+  /* small data tables */
+  table.data {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 56ch;
+    margin: 18px 0 24px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  table.data th, table.data td {
+    text-align: left;
+    padding: 8px 12px 8px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  table.data th {
+    font-weight: 500;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 10.5px;
+    padding-bottom: 10px;
+  }
+  table.data td.num { text-align: right; padding-right: 24px; }
+  table.data .arrow { color: var(--ink-3); padding: 0 6px; }
+
+  /* visual containers */
+  .visual {
+    margin: 24px 0 32px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 32px 28px 24px;
+    overflow-x: auto;
+  }
+  .visual figcaption {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 16px;
+    text-align: center;
+  }
+  .visual svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .visual img { display: block; margin: 0 auto; max-width: 100%; height: auto; border: 1px solid var(--rule); }
+
+  /* platform section: demo callout and subsection styling */
+  .demo-callout {
+    background: var(--bg-2);
+    border: 1px solid var(--rule);
+    padding: 20px 24px;
+    margin: 24px 0 40px;
+    max-width: 68ch;
+    display: flex;
+    gap: 20px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .demo-callout .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .demo-callout a {
+    color: var(--accent);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent);
+  }
+  .demo-callout a:hover { opacity: 0.7; }
+  .demo-callout .note {
+    font-size: 13px;
+    color: var(--ink-2);
+    font-style: italic;
+  }
+
+  .surface {
+    border-top: 1px solid var(--rule);
+    padding: 40px 0 20px;
+  }
+  .surface:last-of-type { border-bottom: 1px solid var(--rule); padding-bottom: 40px; }
+  .surface .surface-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .surface h3 {
+    margin: 0 0 12px;
+    font-size: 22px;
+  }
+  .surface .solves {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 20px 0 6px;
+  }
+  .surface .solves-body {
+    font-size: 15px;
+    color: var(--ink-2);
+    margin-bottom: 18px;
+    max-width: 68ch;
+  }
+  .surface .see-live {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    margin-top: 20px;
+  }
+  .surface .see-live a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent);
+  }
+  .surface figure.visual { margin: 24px 0; }
+  .surface figure.visual + p { margin-top: 24px; }
+
+  /* link-back at bottom */
+  footer.coda {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  footer.coda a { color: var(--accent); text-decoration: none; }
+  footer.coda a:hover { text-decoration: underline; }
+
+  /* inline emphasis */
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  .mono { font-family: var(--mono); font-size: 0.92em; }
+  .small { font-size: 14px; color: var(--ink-2); }
+
+  /* svg helpers */
+  .svg-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--ink-3); }
+  .svg-body { font-family: var(--body); font-size: 11px; fill: var(--ink); }
+  .svg-body-small { font-family: var(--body); font-size: 10px; fill: var(--ink-2); }
+  .svg-display { font-family: var(--display); font-weight: 400; font-size: 13px; fill: var(--ink); }
+  .svg-accent { fill: var(--accent); }
+</style>
+</head>
+<body>
+<main class="page">
+
+<div class="topline">
+  <span>Case study · Product design &amp; frontend</span>
+  <span class="right">Yiyu Wang · 2026</span>
+</div>
+
+<h1 class="title">Designing a recipe-development platform that <em>starts where scientists actually start</em></h1>
+
+<p class="lede">An AI-assisted workflow for food scientists at a 125-year-old European seasonings manufacturer — replacing a long-running spreadsheet-and-tribal-knowledge process. Worked as design lead and frontend engineer at Cumlaude.ai, in partnership with a backend developer and four embedded users.</p>
+
+<div class="intro-grid">
+  <div>
+    <p>The brief sounded straightforward: build an AI tool that helps food scientists develop new recipes faster. The first proposal mirrored that framing — a form to fill, then recipes come out. Within six weeks, the architecture had been rebuilt around a different question: what do food scientists actually do when a new customer briefing lands on their desk? They don't fill forms. They search for similar past projects, find a recipe that mostly works, and modify it. The platform that shipped reflects that.</p>
+    <p>This case study walks through the research approach behind that pivot, the architecture decisions it produced, and the design discipline that emerged from working closely with two food scientists and two business stakeholders across cross-functional reviews.</p>
+  </div>
+  <aside class="fact-card">
+    <dl>
+      <dt>Role</dt>
+      <dd>Design lead, frontend engineer, algorithm research</dd>
+      <dt>Team</dt>
+      <dd>Solo on design &amp; frontend; one backend developer; four users involved (2 food scientists, 2 business leaders)</dd>
+      <dt>Employer</dt>
+      <dd>Cumlaude.ai (AI consultancy, Netherlands)</dd>
+      <dt>Stack</dt>
+      <dd>Next.js · TypeScript · Tailwind · Drizzle / Postgres · OpenAI GPT-4o (extraction) · LlamaIndex Cloud (document parsing) · next-intl (NL / EN)</dd>
+      <dt>Timeline</dt>
+      <dd>Dec 2025 – Feb 2026, parallel with a second client engagement</dd>
+    </dl>
+    <div class="status">
+      <dt style="font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);">Status</dt>
+      <dd style="margin-top:2px;">Wizard deployed on Vercel; tested with food scientists; backend extraction issues surfaced and resolved during use.</dd>
+    </div>
+  </aside>
+</div>
+
+<!-- ─────────────────────────────────────── THE WORLD ─────────────────────────────────────── -->
+<section>
+  <div class="section-label"><span class="num">§ 01</span> The world</div>
+  <h2>How a spice blend gets born</h2>
+
+  <p>A brief lands in a scientist's inbox on a Tuesday morning. A snack brand wants a smoky paprika seasoning for a new chip line. The document is three pages: target market, cost ceiling, allergen list, dietary requirements, clean-label commitments, and a paragraph on the flavour direction — "warm heat, roasted notes, familiar rather than novel."</p>
+
+  <p>What happens next is not what most people imagine when they hear "food scientist." The scientist does not walk to a lab bench and start mixing spices. She opens her email archive. She searches through folders of past projects, downloaded briefs, and Excel sheets. She thinks: <em>we did a smoky paprika for a competitor two years ago — what was that customer, what did we use as the base, why did it get rejected the first round?</em> She messages a colleague who has been in R&amp;D for fifteen years: <em>do you remember the pepper blend we made for that Belgian retailer? Was that the one where we swapped in the Hungarian paprika?</em> The colleague replies within the hour with a recipe code, some pointers on what to change, and the caveat that the customer originally wanted it hotter than they eventually accepted.</p>
+
+  <p>This is the surprising part of the job. Creating a new spice blend is not primarily a creative act. Scientists start from something similar that has already launched, because building on a proven recipe is faster and safer than starting from scratch.</p>
+
+  <p>Somewhere in this company's archives — across the ERP database, shared drives, personal folders, tasting notes stapled into old lab books — is the answer to almost every new brief that comes in. Finding it depends on knowing where to look, and knowing where to look depends on the scientist who happens to remember. Food scientists at this manufacturer spend hours reconstructing past work from scattered emails, spreadsheets, and personal memory instead of iterating on new recipes — because their institutional knowledge base is everywhere but not in one place. That is the problem this platform was designed to solve.</p>
+</section>
+
+<!-- ─────────────────────────────────────── PROBLEM ─────────────────────────────────────── -->
+<section>
+  <div class="section-label"><span class="num">§ 02</span> The problem</div>
+  <h2>A 125-year knowledge base, accessed by memory and spreadsheet</h2>
+
+  <p>This client is a top-three European seasonings manufacturer with 125 years of accumulated recipe development behind them. The R&amp;D team's asset is a pattern library of thousands of blends, held in three places: a legacy ERP database, the personal experience of individual scientists, and a long tail of spreadsheets, emails, and tasting notes.</p>
+
+  <p>The process works &mdash; but it depends entirely on individual recall. Junior developers don't have it. Knowledge walks out the door when scientists leave. Every new project starts from a search that is essentially a memory query, not a database query.</p>
+
+  <div class="callout">"R&amp;D developers don't start from scratch. They search for similar existing recipes first, then decide whether to use as-is or customise."</div>
+
+  <p>That single insight became the load-bearing principle for the entire platform. It also forced a pivot away from the first design.</p>
+</section>
+
+<!-- ─────────────────────────────────────── DIAGNOSTIC ─────────────────────────────────────── -->
+<section>
+  <div class="section-label"><span class="num">§ 03</span> The design frame</div>
+  <h2>Automating the search, not the science</h2>
+
+  <p>The build could have gone in two directions: automate the whole workflow, or automate the friction. We chose the second. The platform behaves as a lab assistant — it does the work of finding, reading, and comparing that scientists were doing manually, and it hands back the point at which real scientific judgment starts. Everything downstream is theirs. This frame decided nearly every subsequent design choice.</p>
+
+  <h3>What the old workflow did well</h3>
+  <p>The workflow worked &mdash; but only in the memory of the people doing it. Three things about it were worth preserving: the reuse pattern (start from similar, don't start blank), the iteration practice (recipes accumulate version notes with sensory observations and ingredient swaps), and human judgment as the final layer on flavour and market fit.</p>
+
+  <h3>Where it broke</h3>
+  <p>Everything else depended on individual recall. Junior developers didn't have it. Knowledge walked out the door when experienced scientists left. The tools they used &mdash; the legacy ERP, project intake, shared drives, emails &mdash; held the answers. Finding them required knowing where to look.</p>
+
+  <h3>What to keep, what to automate, what to redesign</h3>
+
+  <p><strong>Kept as-is:</strong> the modify-existing-recipe workflow, the version-annotation practice, human judgment on flavour and market fit. The platform's structure mirrors these — it does not propose an alternative way of working.</p>
+
+  <p><strong>Automated:</strong> the search across scattered sources, the extraction of structured fields from PDF briefs, and the ranking of past projects by how well they match the new brief. This is memory work, not scientific work. Scientists can do it — they just shouldn't have to.</p>
+
+  <p><strong>Redesigned:</strong> the interface where scientists meet AI output. This was the hardest choice. The natural design would be "AI reads brief, AI returns recipe" — one input, one output. What shipped instead is a step-by-step surface where the AI proposes and the scientist decides, with four actions available per suggestion: accept, reject, modify, add. The change came from reading the client's own recipe database.</p>
+
+  <p>One cheese-sauce recipe in the archive had twenty-seven versions across several years, each carrying a note like this:</p>
+
+  <table class="data" style="max-width:64ch;">
+    <thead><tr><th style="width:8ch;">Version</th><th>Note (paraphrased)</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">v1</td><td>Too sour, pH 2.5 — appearance fine</td></tr>
+      <tr><td class="mono">v2</td><td>Vinegar reduced, citrus concentrate down, sugar up</td></tr>
+      <tr><td class="mono">v3</td><td>Customer asked for clean label, no added sugar. Thickener and salt too high. pH 3.2</td></tr>
+      <tr><td class="mono">v4</td><td>Sample sent to customer for evaluation</td></tr>
+    </tbody>
+  </table>
+
+  <p>Hundreds of recipes carry this kind of trail. Scientists were <em>already</em> iterating exactly the way the platform would eventually model — proposing a change, deciding whether it worked, noting why, moving on. They just didn't have a structure for it. The platform's job wasn't to teach them a new way of working. It was to formalise the practice already in the database — and to keep the scientist, not the model, at the centre of every decision.</p>
+
+  <p class="small">Methodology note. This diagnostic came from workflow archaeology — reading the client's own recipe database and their two existing internal systems alongside recurring cross-functional review with two food scientists and two business leaders. The written research plan was a five-thread structure across desk research, competitive analysis of internal tools, knowledge-base archaeology, technical evaluation of matching architectures, and embedded review. In practice, the archaeology and the embedded review carried most of the weight. Where the research was weaker: a more structured first-conversation round before the first proposal would have caught the form-first framing earlier.</p>
+</section>
+
+<!-- ─────────────────────────────────────── PLATFORM ─────────────────────────────────────── -->
+<section>
+  <div class="section-label"><span class="num">§ 04</span> The platform</div>
+  <h2>Three surfaces: a wizard, a knowledge bank, a workspace</h2>
+
+  <p>Everything above this section is diagnosis. This is what shipped. The platform organises around three surfaces — one for turning a new brief into a starting recipe, one for searching a century of past formulations, one for iterating on a v0.8 draft under locked constraints. Each surface does a specific piece of the workflow described in &sect; 03; together they cover the memory-and-search work that used to live in scientists' heads.</p>
+
+  <div class="demo-callout">
+    <span class="label">Click through</span>
+    <a href="https://yiyu-w.github.io/case-study-recipe-platform-demo/" target="_blank" rel="noopener">Open the interactive demo &nbsp;&rarr;</a>
+    <span class="note">Screens rebuilt for portfolio with invented data. Client formulations are under NDA.</span>
+  </div>
+
+  <div class="surface">
+    <div class="surface-num">01 &middot; Wizard</div>
+    <h3>From customer brief to a starting recipe, in five steps</h3>
+
+    <p>The wizard is the platform's opening screen. A scientist drops a customer briefing PDF into the upload zone, the AI extracts about fifty structured fields, the scientist confirms with per-field confidence numbers visible. The platform then ranks past briefs by how well they match the new one, and the scientist picks one to start from. The output is a recipe v0.8 &mdash; deliberately not v1.0.</p>
+
+    <p><strong>Match past briefs, ranked by why.</strong> The system returns past customer briefs, ranked by an eight-factor similarity score, with each row showing what it matched on and what it missed. The flow is intentionally academic: your new question &rarr; similar past questions &rarr; how those past questions were answered &rarr; can that answer serve as reference for yours? It reads like a literature review, because the scientific work underneath it is the same. When the scientist selects a matched brief, the recipe linked to that brief opens as the reference for building v0.8.</p>
+
+    <figure class="visual">
+      <img src="wizard-3-match-briefs.jpg" alt="Wizard step 3: Which past project asked the same question? A ranked list of historical briefs with match scores, customer types, and outcomes.">
+      <figcaption>Step 3 &middot; briefs ranked question-to-question, not recipe-to-recipe</figcaption>
+    </figure>
+
+    <p><strong>Raw record on the left, interpretation on the right.</strong> The legacy ERP row is shown exactly as stored &mdash; monospace, in Dutch, abbreviations intact. The interpreted view on the right explains what each field means in the context of the new brief. Trust comes from exposing the source, not from tidying it away.</p>
+
+    <figure class="visual">
+      <img src="wizard-4-raw-vs-interpreted.jpg" alt="Wizard step 4: Raw ERP record on the left, interpretation against the new brief on the right, with match/review/violation labels.">
+      <figcaption>Step 4 &middot; the AI interprets; the raw data stays visible</figcaption>
+    </figure>
+
+    <p><strong>Four actions per suggestion, not one.</strong> Every AI proposal comes with four buttons: accept, reject, modify, add. Modify is the most-used action in practice. The version is saved as v0.8 &mdash; a name that signals "starting hypothesis for the bench," never "recipe for the customer."</p>
+
+    <figure class="visual">
+      <img src="wizard-5-four-actions.jpg" alt="Wizard step 5: Mutation editor showing four action buttons (accept, reject, modify, add) per suggested recipe change, with a match-to-brief score composed from the historical match and the scientist's edits.">
+      <figcaption>Step 5 &middot; the AI proposes, the scientist decides</figcaption>
+    </figure>
+
+    <div class="solves">Solves</div>
+    <p class="solves-body">The memory query that used to be "do you remember the pepper blend we made for that Belgian retailer?" is now a structured search. Junior developers get access to the same institutional knowledge that used to live only in senior heads.</p>
+
+    <div class="see-live">See it live &middot; <a href="https://yiyu-w.github.io/case-study-recipe-platform-demo/" target="_blank" rel="noopener">click through the wizard &rarr;</a></div>
+  </div>
+
+  <div class="surface">
+    <div class="surface-num">02 &middot; Knowledge bank</div>
+    <h3>Searching a century of formulations</h3>
+
+    <p>The knowledge bank is where scientists go when they are not starting from a brief &mdash; to look up a single ingredient, check what recipes use it, or scan the development history of a specific product line. Search is faceted with counts: 1,284 recipes, 3,910 ingredients. It reads closer to a literature database than to a product catalogue &mdash; because the archive is a research asset, not a shop.</p>
+
+    <figure class="visual">
+      <img src="knowledge-bank.jpg" alt="Knowledge bank tab: faceted search across recipes and ingredients, with a raw ERP record view and a development history sidebar showing 27 versions of a recipe with plain-text notes for each version.">
+      <figcaption>Faceted search &middot; the raw record and the development history live side by side</figcaption>
+    </figure>
+
+    <div class="solves">Solves</div>
+    <p class="solves-body">The 125-year archive was practically inaccessible without knowing which recipe number to look up. The knowledge bank turns it into a searchable research surface where the archive's plain-text version history stays legible instead of being flattened into a status column.</p>
+
+    <div class="see-live">See it live &middot; <a href="https://yiyu-w.github.io/case-study-recipe-platform-demo/" target="_blank" rel="noopener">open the knowledge bank &rarr;</a></div>
+  </div>
+
+  <div class="surface">
+    <div class="surface-num">03 &middot; Workspace</div>
+    <h3>Iterating a v0.8 under locked constraints</h3>
+
+    <p>The workspace is where a recipe v0.8 becomes v0.9, v0.8.1, v0.8.2 &mdash; the iteration loops that happen after the bench work starts. Three panels: constraints from the brief (locked), constraints that can change with a documented reason (cost, shelf life), and formulation fields the scientist moves freely. The version history sidebar reads like a Git log.</p>
+
+    <figure class="visual">
+      <img src="workspace.jpg" alt="Workspace tab: recipe iteration view with three tiers of constraints on the left (locked / change with reason / free), a formulation table showing v0.8 vs current values, and a version history sidebar with notes on each iteration.">
+      <figcaption>Three tiers of constraints on the left, formulation in the middle, version history on the right</figcaption>
+    </figure>
+
+    <div class="solves">Solves</div>
+    <p class="solves-body">Iteration was already the practice &mdash; the archive is full of twenty-seven-version recipes with notes. What was missing was the constraint layer that made it safe to iterate: which values the scientist can change without going back to compliance, and which they cannot. The workspace makes the invisible boundaries visible.</p>
+
+    <div class="see-live">See it live &middot; <a href="https://yiyu-w.github.io/case-study-recipe-platform-demo/" target="_blank" rel="noopener">open the workspace &rarr;</a></div>
+  </div>
+
+  <p style="margin-top: 40px;">The three surfaces are deliberately narrow. Each does one thing that scientists already do, and does it in a way that leaves their judgment intact. The output of the wizard is named v0.8 for a reason: it is a starting hypothesis, not a shipping recipe. The bench work, the sensory panel, the lab iterations, the sign-off &mdash; all of that stays where it was, in the hands of the people who own the science.</p>
+</section>
+
+<!-- ─────────────────────────────────────── DECISIONS ─────────────────────────────────────── -->
+<section>
+  <div class="section-label"><span class="num">§ 05</span> Six design decisions</div>
+  <h2>Where research moved the design</h2>
+
+  <p>Six decisions worth foregrounding. Each had an alternative, each carried a trade-off, and each was made in response to specific evidence rather than to a design preference. The first five are visible in the interactive demo linked above; the sixth is the matching architecture beneath the surface.</p>
+
+  <article class="decision">
+    <div class="idx">01</div>
+    <div>
+      <h3>Match first, then customise</h3>
+      <p>The first proposal asked the scientist to specify product type, target market, cost ceiling, dietary constraints, and allergens before showing anything. A long form, then recipes. The version-two rewrite restructured around a different opening: as soon as the brief is uploaded and extracted, the system shows the closest historical matches. The scientist chooses one &mdash; use as-is, use as a starting point, or start fresh &mdash; before any customisation form appears. The shift came from reading the client's own workflow documentation: scientists worked in the order search &rarr; find close &rarr; modify. The form-first approach made them work in an order they don't actually use. <span class="small">In the demo, this is Steps 1&ndash;3 of the wizard.</span></p>
+      <p class="tradeoff">Trade-off</p>
+      <p class="tradeoff-body">Match-first only works if the corpus is rich. For a totally novel product category with no historical analogue, the user falls back to a "start fresh" path &mdash; a less polished surface than the matched flow. The bet is that genuinely new categories are rare for a 125-year-old company.</p>
+    </div>
+  </article>
+
+  <article class="decision">
+    <div class="idx">02</div>
+    <div>
+      <h3>Treat the brief as a research question</h3>
+      <p>The system first matches the new <em>brief</em> against historical <em>briefs</em>, then retrieves the recipes those past briefs produced &mdash; not recipe-to-recipe similarity. Recipes don't carry the question they were trying to answer, only the answer. A vinaigrette recipe doesn't know whether the customer prioritised cost or clean label, whether allergens were a hard constraint or a nice-to-have. The brief carries all of that. Question-to-question first retrieves recipes developed under similar constraints, not recipes that just look chemically similar.</p>
+
+      <p>The flow mirrors an academic literature review: your new brief is the question, the ranked historical briefs are past studies of the same question, the recipes linked to those briefs are the answers. The scientist evaluates whether a past answer still applies. Two scoring stages run in sequence &mdash; the first ranks past briefs against the new one; the second scores how well each linked recipe fits the new brief. A recipe can come back at 91% on stage one and 63% on stage two: an old answer to a similar question that still needs adapting.</p>
+
+      <p>When no historical brief crosses the 0.40 similarity threshold, the platform offers a "start fresh" path that generates a draft directly from the extracted requirements.</p>
+
+      <p class="tradeoff">Trade-off</p>
+      <p class="tradeoff-body">Requires that historical briefs are linked to historical recipes in the database, which they weren't initially. Data scoping became part of the project.</p>
+    </div>
+  </article>
+
+  <article class="decision">
+    <div class="idx">03</div>
+    <div>
+      <h3>Version naming as honesty about AI's limits</h3>
+      <p>What the platform produces is not a finished recipe. It's a starting hypothesis &mdash; roughly 80% of the way to where the scientist needs to end up, with the remaining 20% owned by lab validation, sensory panels, shelf-life testing, and production trials. Most AI products elide that distinction. This platform builds it into the product itself, through the version-naming convention:</p>
+      <table class="data" style="max-width:60ch;">
+        <tbody>
+          <tr><td class="mono">v0.8</td><td>Platform-generated draft. Computational. Hours to produce.</td></tr>
+          <tr><td class="mono">v0.8.x</td><td>Lab iterations &mdash; adjusting acid, viscosity, sweetness.</td></tr>
+          <tr><td class="mono">v0.9</td><td>Sensory-panel approved.</td></tr>
+          <tr><td class="mono">v1.0</td><td>Production-validated and customer-approved.</td></tr>
+        </tbody>
+      </table>
+      <p>The output of the wizard is deliberately never named "v1.0." A scientist who hands the platform output to a customer as-is would be doing something the version number tells them not to do.</p>
+      <p class="tradeoff">Trade-off</p>
+      <p class="tradeoff-body">The naming convention requires user education. The first instinct from a business stakeholder was to ask why the platform doesn't produce "the recipe." The answer &mdash; because no software does &mdash; is correct but takes a minute to explain.</p>
+    </div>
+  </article>
+
+  <article class="decision">
+    <div class="idx">04</div>
+    <div>
+      <h3>Algorithm evolution: two rebalances on real evidence</h3>
+      <p>The recipe-scoring algorithm went through two visible shifts during the project. The first version balanced four signals: how well a recipe matched the briefing directly, whether it had been used in production, how recently, and its actual success record. Initial weights were heavy on direct matching &mdash; 70 / 15 / 10 / 5.</p>
+      <p>After a working session with a food scientist, the weighting shifted. Their feedback: in their reality, historical success weighs heavier than the chemistry. A recipe that has been through development, tasted by the customer, and put into production carries trust that a paper-only match cannot.</p>
+      <table class="data" style="max-width:56ch;">
+        <thead><tr><th></th><th class="num">v1.0</th><th class="num">v1.1</th></tr></thead>
+        <tbody>
+          <tr><td>Direct match</td><td class="num">70%</td><td class="num">50%</td></tr>
+          <tr><td>Proven in production</td><td class="num">15%</td><td class="num">25%</td></tr>
+          <tr><td>Recency</td><td class="num">10%</td><td class="num">10%</td></tr>
+          <tr><td>Success record</td><td class="num">5%</td><td class="num">15%</td></tr>
+        </tbody>
+      </table>
+      <p>A second refinement handled sensory data landing for some ingredient categories but not others. Rather than wait for full coverage, the algorithm went dual-mode: when sensory profiles are available, flavour similarity weighs at 30%; when not, it falls back to composition-text-plus-nutrition. The refinement also added hard rules: incompatible category groups are blocked before scoring, sub-roles are differentiated (cream as fat-provider, cheese powder as flavour-provider), and physical form is matched.</p>
+      <p class="tradeoff">Trade-off</p>
+      <p class="tradeoff-body">More rules mean more places to be wrong. Hard-blocking rules reduce false-positives at the cost of some false-negatives &mdash; occasionally a clever cross-category substitution gets filtered out. The Add Custom action lets the scientist override any filter.</p>
+    </div>
+  </article>
+
+  <article class="decision">
+    <div class="idx">05</div>
+    <div>
+      <h3>Trust calibration as a design discipline</h3>
+      <p>Halfway through the build, feedback came back that the UI was "too flashy" for a scientific tool. Confidence percentages in big green circles, animated transitions, gradient backgrounds, decorative iconography. The pivot was deliberate: a "Lab Report" aesthetic. Mono base, a single deep-green accent for hierarchy only, small dots and abbreviation pills instead of icons, sharp corners, flat colours, monospace for numeric data. Comparison tables instead of comparison cards. Animations removed. The product looks less impressive and is more credible.</p>
+      <div class="callout">Calm by default, unmissable when needed &mdash; the same restraint discipline applied to two very different users, on two parallel projects.</div>
+      <p>Beyond the aesthetic pivot, three design moves preserve scientist agency over the AI. <strong>Raw and interpreted side by side:</strong> the legacy ERP record is shown verbatim on the left, monospace, in Dutch, alongside the system's interpretation on the right. <strong>Three visible tiers of constraint:</strong> hard locks (allergens, dietary, clean-label) cannot be edited; soft locks (cost, shelf-life) require a documented reason; flexible fields (packaging, portioning) are fully editable. Colour tells the scientist which is which. <strong>Four mutation actions, not one:</strong> Accept, Reject, Modify, Add. Modify is the most-used in practice &mdash; AI proposals are usually directionally right but not specifically right, and the four-action pattern surfaces disagreement productively.</p>
+      <p class="tradeoff">Trade-off</p>
+      <p class="tradeoff-body">A restrained UI takes longer to demo well. Selling internally was easier with the big green circles. The decision was that real users mattered more than the demo audience &mdash; but it's a real cost for a consultancy that has to win the next engagement.</p>
+    </div>
+  </article>
+
+  <article class="decision">
+    <div class="idx">06</div>
+    <div>
+      <h3>Hybrid matching, not pure vector or pure filter</h3>
+      <p>The matching engine that powers both scoring stages was its own architectural question. Four approaches were evaluated: structured filtering (SQL filters on dietary, compliance, product type), vector embeddings with cosine similarity, hybrid search combining the two, and a graph-database approach. Each was scored on explainability, semantic accuracy, infrastructure cost, and fit to the data we had.</p>
+      <p>The decision was hybrid: hard filters for the non-negotiables (dietary, compliance, product type), vector similarity for the semantic dimensions (flavour direction, primary flavours), and weighted scoring on top. Pure structured filtering missed "Mediterranean herbs" being similar to "Greek seasoning." Pure vector search was a black box that couldn't explain its results. Hybrid kept explainability where it mattered &mdash; a clean-label requirement is a hard yes or no, not a 0.78 probability &mdash; and ceded interpretation to the model where exact matching was too brittle.</p>
+      <p class="tradeoff">Trade-off</p>
+      <p class="tradeoff-body">Hybrid systems have more moving parts to maintain than pure approaches. The weight tuning, the threshold selection, the boundary between "hard filter" and "soft signal" all become project-specific choices that need documentation. The alternative — a single-mechanism engine — would be simpler to build and worse at the actual task. The complexity earns its cost only if the domain has hard rules that must not be violated, which this one does.</p>
+    </div>
+  </article>
+</section>
+
+<!-- ─────────────────────────────────────── OUTCOME ─────────────────────────────────────── -->
+<section>
+  <div class="section-label"><span class="num">§ 06</span> What shipped, and what I'd do differently</div>
+  <h2>Honest about both</h2>
+
+  <p>The three surfaces shipped to Vercel and were tested live with the two food scientists. The workflow itself held up — no structural problems were reported in the recipe-development path. A backend extraction issue around PDF parsing surfaced during use and was diagnosed and fixed mid-cycle, which counts as the platform doing its job: it was being used hard enough to break.</p>
+
+  <p>The version-two reframe — match first, then customise — became the load-bearing architectural commitment of the product. The brief-to-brief similarity engine, the v0.8 naming convention, and the four-action mutation editor all stayed through the final build. The "too flashy" feedback round produced a UI that the scientists trusted on sight, which matters in a domain where credibility is most of the work.</p>
+
+  <p>Quantitative outcomes are not available. The platform was not in production long enough to measure whether real lab-iteration counts dropped from the claimed 6–12 toward the targeted 3–5, and the consultancy engagement is ending before that data window will close. I would rather say that honestly than fabricate a percentage.</p>
+
+  <h3>What changed for the scientists</h3>
+  <p>The measure that matters is how long a new brief takes to turn into a starting recipe. Before the platform, the front end of a project ran two to three days: searching email archives and Excel sheets, consulting colleagues, comparing old recipes to new requirements. In working sessions with the two food scientists on the client side, that phase now takes about one day.</p>
+  <p>The specific flow they responded to was the sequence: find a matching brief, check the linked recipe in the knowledge bank, log iterations in the workspace. In their words, it maps onto how they already work &mdash; search, pull up the answer, adapt it, track the changes. It gives structure to the order they were already running informally.</p>
+
+  <h3>What I'd change</h3>
+  <p>Three things, in order.</p>
+  <p>I would run a structured first-conversation round before writing the first proposal. The form-first version-one would have been caught in week one rather than week six. The detour was useful in retrospect — the contrast between v1 and v2 sharpened the architectural insight — but cheaper paths to the same insight exist.</p>
+  <p>I would deploy a thin slice to Vercel earlier. The most useful feedback came once scientists could click through a working surface; the document-based reviews before that were lower-bandwidth than the live ones, and a Vercel link three weeks earlier would have shifted more of the design work into the high-bandwidth phase.</p>
+  <p>I would instrument the platform for outcome measurement from the start — track iteration counts, time-to-first-viable-prototype, mutation accept/reject/modify ratios per scientist — even before the data could be used, so that if the engagement extends, the measurement window is already running. The next version of this project, on a different client, will start that way.</p>
+</section>
+
+<footer class="coda">
+  <span>Yiyu Wang · Product designer &amp; frontend engineer · 2026</span>
+  <span>Case study · seasonings &amp; food manufacturer</span>
+</footer>
+
+</main>
+</body>
+</html>
